@@ -22,7 +22,7 @@ function DOWNLOAD_PULLSECRET {
 }
 
 function SSH_KEY {
-	ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519
+	ssh-keygen -t ed25519 -N '' -f id_ed25519
 }
 
 ARG=$#
