@@ -15,5 +15,25 @@ mkdir /vms
 chmod +x -R /vms
 }
 
+function CONFIGURE_DNS {
+	systemctl enable NetworkManager --now
+	echo -e "[main]\ndns=dnsmasq" > /etc/NetworkManager/conf.d/nm-dns.conf
+	echo "local=/${CLUSTER_NAME}.${DOMAIN}/" > ${DNS_DIR}/${CLUSTER_NAME}.conf
+	echo "address=/apps.${CLUSTER_NAME}.${BASE_DOM}/192.168.122.1" >> ${DNS_DIR}/${CLUSTER_NAME}.conf
+	echo "192.168.122.90 bootstrap.${CLUSTER_NAME}.${DOMAIN}" >> /etc/hosts
+	echo "192.168.122.91 master0.${CLUSTER_NAME}.${DOMAIN}" >> /etc/hosts
+	echo "192.168.122.92 master1.${CLUSTER_NAME}.${DOMAIN}" >> /etc/hosts
+	echo "192.168.122.93 master2.${CLUSTER_NAME}.${DOMAIN}" >> /etc/hosts
+	echo "192.168.122.94 worker0.${CLUSTER_NAME}.${DOMAIN}" >> /etc/hosts
+	echo "192.168.122.95 worker1.${CLUSTER_NAME}.${DOMAIN}" >> /etc/hosts
+	echo "192.168.122.1 lb.${CLUSTER_NAME}.${DOMAIN}" "api.${CLUSTER_NAME}.${DOMAIN}" "api-int.${CLUSTER_NAME}.${DOMAIN}" >> /etc/hosts
+	systemctl reload NetworkManager
+	systemctl restart libvirtd
+}
+
+source $(pwd)/env
+DNS_DIR=/etc/NetworkManager/dnsmasq.d
+
 CHECK_PACKAGES
 CHECK_DIR
+CONFIGURE_DNS
