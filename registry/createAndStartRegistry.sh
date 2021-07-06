@@ -85,7 +85,6 @@ EOF
 
 function RUN_REGISTRY {
 	mkdir -p $DIR/data
-	podman rm -f $(podman ps -a | grep registry | awk '{print $1}') > /dev/null
 	podman run -d --name mirror-registry \
 		   -p 5000:5000 --restart=always \
 		   -v ./data:/var/lib/registry:z \
