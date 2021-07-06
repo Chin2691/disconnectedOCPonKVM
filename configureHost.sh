@@ -6,7 +6,7 @@ function CHECK_PACKAGES {
 subscription-manager register
 subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-ose-4.7-rpms
 yum groupinstall -y virtualization-client virtualization-platform virtualization-tools
-yum install -y screen podman httpd-tools jq
+yum install -y screen podman httpd-tools jq git
 }
 
 function CHECK_DIR {
