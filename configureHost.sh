@@ -31,8 +31,27 @@ function CONFIGURE_DNS {
 	systemctl restart libvirtd
 }
 
-function CONFIGURE_WEB {
-	screen -S ws -dm bash -c "cd /ocp/*/; python -m SimpleHTTPServer 8080"
+function CONFIGURE_WEBSERVER {
+	screen -S webserver -dm bash -c "cd /ocp/*/; python -m SimpleHTTPServer 8080"
+	CIDR=$(ip -4 a s $(virsh net-info default | awk '/Bridge:/{print $2}') | awk '/inet /{print $2}')
+	iptables -I INPUT 1 -p tcp -m tcp --dport 8080 -s $CIDR -j ACCEPT
+}
+
+function CONFIGURE_DHCP {
+	MAC=$(ip a s $(virsh net-info default | awk '/Bridge:/{print $2}') | awk '/ether /{print $2}' | cut -f1-4 -d':')
+	MAC_BOOTSTRAP=$MAC:91:90
+	MAC_MASTER0=$MAC:91:91
+	MAC_MASTER1=$MAC:91:92
+	MAC_MASTER2=$MAC:91:93
+	MAC_WORKER0=$MAC:91:94
+	MAC_WORKER1=$MAC:91:95
+	virsh net-update default add-last ip-dhcp-host --xml "<host mac='${MAC_BOOTSTRP}' ip='192.168.122.90'/>" --live --config
+	virsh net-update default add-last ip-dhcp-host --xml "<host mac='${MAC_MASTER0}' ip='192.168.122.91'/>" --live --config
+	virsh net-update default add-last ip-dhcp-host --xml "<host mac='${MAC_MASTER1}' ip='192.168.122.92'/>" --live --config
+	virsh net-update default add-last ip-dhcp-host --xml "<host mac='${MAC_MASTER2}' ip='192.168.122.93'/>" --live --config
+	virsh net-update default add-last ip-dhcp-host --xml "<host mac='${MAC_WORKER0}' ip='192.168.122.94'/>" --live --config
+	virsh net-update default add-last ip-dhcp-host --xml "<host mac='${MAC_WORKER1}' ip='192.168.122.95'/>" --live --config
+	system restart libvirtd
 }
 
 source $(pwd)/env
@@ -41,4 +60,5 @@ DNS_DIR=/etc/NetworkManager/dnsmasq.d
 CHECK_PACKAGES
 CHECK_DIR
 CONFIGURE_DNS
-CONFIGURE_WEB
+CONFIGURE_WEBSERVER
+CONFIGURE_DHCP

@@ -47,15 +47,6 @@ chmod +x -R /vms
 CIDR=$(ip -4 a s $(virsh net-info default | awk '/Bridge:/{print $2}') | awk '/inet /{print $2}')
 iptables -I INPUT 1 -p tcp -m tcp --dport 8080 -s $CIDR -j ACCEPT
 screen -S ws -dm bash -c "cd /root/vms; python -m SimpleHTTPServer 8080"
-mkdir /vms/bootstrap && cd /vms/bootstrap
-export VERSION=4.7.13
-wget -O rhcos.iso https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-$VERSION-x86_64-live.x86_64.iso
-wget -O rootfs.img https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-$VERSION-x86_64-live-rootfs.x86_64.img
-wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/$VERSION/openshift-client-linux-$VERSION.tar.gz
-wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/$VERSION/openshift-install-linux-$VERSION.tar.gz
-tar xfv openshift-client-linux.tar.gz oc
-tar xfv openshift-install-linux.tar.gz openshift-install
-if [ ! -f ~/.ssh/id_rsa.pub ]; then ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519; fi
 
 #### Start VMs
 VIRT_NET=default
@@ -64,8 +55,8 @@ WEB_PORT=8080
 MAC1=52:54:00:ed:9a:d1
 MAC2=52:54:00:ed:9a:d2
 IGNITION=bootstrap.ign
-virsh destroy bootstrap
-virsh undefine bootstrap
+virsh destroy bootstrap > /dev/null
+virsh undefine bootstrap > /dev/null
 virt-install --name bootstrap \
 	     --disk rhcos.img \
 	     --ram 16000 --vcpus 4 \
@@ -75,4 +66,4 @@ virt-install --name bootstrap \
 	     --network network=${VIRT_NET},mac=${MAC2} \
 	     --location rhcos.iso \
 	     --nographics \
-	     --extra-args "nomodeset rd.neednet=1 console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=vda coreos.live.rootfs_url=http://${HOST_IP}:${WEB_PORT}/rootfs.img coreos.inst.ignition_url=http://${WEB_IP}:${WEB_PORT}/${IGNITION}"
+	     --extra-args "nomodeset rd.neednet=1 console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=vda coreos.live.rootfs_url=http://${HOST_IP}:${WEB_PORT}/downloads/rootfs.img coreos.inst.ignition_url=http://${WEB_IP}:${WEB_PORT}/cluster-files/${IGNITION}"
