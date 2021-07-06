@@ -11,8 +11,8 @@ yum install -y screen podman httpd-tools jq git
 
 function CHECK_DIR {
 # Check and create required directory
-mkdir /vms
-chmod +x -R /vms
+mkdir /ocp
+chmod +x -R /ocp
 }
 
 function CONFIGURE_DNS {
@@ -31,9 +31,14 @@ function CONFIGURE_DNS {
 	systemctl restart libvirtd
 }
 
+function CONFIGURE_WEB {
+	screen -S ws -dm bash -c "cd /ocp/*/; python -m SimpleHTTPServer 8080"
+}
+
 source $(pwd)/env
 DNS_DIR=/etc/NetworkManager/dnsmasq.d
 
 CHECK_PACKAGES
 CHECK_DIR
 CONFIGURE_DNS
+CONFIGURE_WEB
