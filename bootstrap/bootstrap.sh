@@ -14,7 +14,9 @@ VIRT_NET=default
 VM_NAME=bootstrap
 WEB_IP=192.168.122.1
 WEB_PORT=8080
-ISO=../downloads/rhcos.iso
+ISO=${BASE_DIR}/downloads/rhcos.iso
+ROOTFS=http://${WEB_IP}:${WEB_PORT}/downloads/rootfs.img
+IGNITION=http://${WEB_IP}:${WEB_PORT}/cluster-files/bootstrap.ign
 DISK=$(pwd)/bootstrap.img
 virsh destroy ${VM_NAME} > /dev/null
 virsh undefine ${VM_NAME} > /dev/null
@@ -27,8 +29,10 @@ virt-install --name ${VM_NAME} \
 	     --network network=${VIRT_NET},mac=${MAC} \
 	     --location ${ISO} \
 	     --nographics \
-	     --extra-args "nomodeset rd.neednet=1 console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=vda coreos.live.rootfs_url=http://${WEB_IP}:${WEB_PORT}/downloads/rootfs.img coreos.inst.ignition_url=http://${WEB_IP}:${WEB_PORT}/cluster-files/master.ign"
+	     --extra-args "nomodeset rd.neednet=1 console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=vda coreos.live.rootfs_url=${ROOTFS} coreos.inst.ignition_url=${IGNITION}"
 }
+
+source ../env
 
 CHECK_DISK
 CREATE_VM

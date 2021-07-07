@@ -5,7 +5,7 @@ function CREATE_MANIFESTS {
 ../downloads/openshift-install create manifests --dir=./
 }
 
-function CREATE_IGNITION {
+function CREATE_IGNITIONS {
 ../downloads/openshift-install create ignition-configs --dir=./
 }
 
