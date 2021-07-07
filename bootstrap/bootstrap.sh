@@ -32,7 +32,7 @@ virt-install --name ${VM_NAME} \
 	     --extra-args "nomodeset rd.neednet=1 console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=vda coreos.live.rootfs_url=${ROOTFS} coreos.inst.ignition_url=${IGNITION}"
 }
 
-source ../env
+source ../../env
 
 CHECK_DISK
 CREATE_VM
