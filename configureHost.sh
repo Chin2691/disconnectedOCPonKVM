@@ -32,10 +32,8 @@ function CONFIGURE_DNS {
 }
 
 function CONFIGURE_WEBSERVER {
-	screen -S webserver -dm bash -c "cd /ocp/*/; python -m SimpleHTTPServer 8080"
-	CIDR=$(ip -4 a s $(virsh net-info default | awk '/Bridge:/{print $2}') | awk '/inet /{print $2}')
-	iptables -I INPUT 1 -p tcp -m tcp --dport 8080 -s $CIDR -j ACCEPT
-}
+	screen -S webserver -dm bash -c "cd ${BASE_DIR}; python -m SimpleHTTPServer 8080"
+	}
 
 function CONFIGURE_DHCP {
 	MAC=$(ip a s $(virsh net-info default | awk '/Bridge:/{print $2}') | awk '/ether /{print $2}' | cut -f1-4 -d':')
@@ -54,6 +52,15 @@ function CONFIGURE_DHCP {
 	systemctl restart libvirtd
 }
 
+function CONFIGURE_FIREWALL {
+	CIDR=$(ip -4 a s $(virsh net-info default | awk '/Bridge:/{print $2}') | awk '/inet /{print $2}')
+	iptables -I INPUT 1 -p tcp -m tcp --dport 8080 -s $CIDR -j ACCEPT
+	iptables -I INPUT 1 -p tcp -m tcp --dport 6443 -s $CIDR -j ACCEPT
+	iptables -I INPUT 1 -p tcp -m tcp --dport 22623 -s $CIDR -j ACCEPT
+	iptables -I INPUT 1 -p tcp -m tcp --dport 443 -s $CIDR -j ACCEPT
+	iptables -I INPUT 1 -p tcp -m tcp --dport 80 -s $CIDR -j ACCEPT
+}
+
 source $(pwd)/env
 DNS_DIR=/etc/NetworkManager/dnsmasq.d
 
@@ -62,3 +69,4 @@ CHECK_DIR
 CONFIGURE_DNS
 CONFIGURE_WEBSERVER
 CONFIGURE_DHCP
+CONFIGURE_FIREWALL
