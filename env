@@ -1,3 +1,2 @@
 export CLUSTER_NAME=ocp
 export DOMAIN=example.local
-export BASE_DIR=/home/vkochuku/Lab/disconnectedOCPonKVM
